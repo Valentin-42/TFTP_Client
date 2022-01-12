@@ -10,15 +10,15 @@ int main(int argc, char* argv[]){
 
 	int err = getaddrinfo(argv[1], NULL, &hints, &res);
 	if(err == -1){
-		printf("Erreur getAddrInfo");
+		perror("Erreur getAddrInfo");
 	}else{
 		DISPLAY_IP(*res);
 		int sock;
-		if((sock = socket(PF_INET, SOCK_STREAM,0)) < 0){
-			printf("Erreur creation socket\n");
+		if((sock = socket(PF_INET, SOCK_DGRAM,IPPROTO_UDP)) < 0){ //SOCK_DGRAM -> UDP // SOCK_STREAM -> TCP
+			perror("Erreur creation socket");
 		}else{
 			printf("Socket créé\n");
-			int err = connect(sock,res->ai_addr,res->ai_addrlen);
+			int err = connect(sock,res->ai_addr,res->ai_addrlen);//
 			if(err == -1){
 				perror("Erreur connection serveur");
 			}else{
