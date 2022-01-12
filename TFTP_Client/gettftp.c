@@ -1,5 +1,7 @@
 #include "gettftp.h"
 
+
+
 int main(int argc, char* argv[]){
 	/*TEST*/
 	printf("Get\n");
@@ -17,18 +19,52 @@ int main(int argc, char* argv[]){
 		if((sock = socket(PF_INET, SOCK_DGRAM,IPPROTO_UDP)) < 0){ //SOCK_DGRAM -> UDP // SOCK_STREAM -> TCP
 			perror("Erreur creation socket");
 		}else{
-			printf("Socket créé\n");
+			printf("Socket créé : %d\n", sock);
 			int err = connect(sock,res->ai_addr,res->ai_addrlen);//
 			if(err == -1){
 				perror("Erreur connection serveur");
 			}else{
 				printf("Connection établie\n");
+
+				read_request(sock,argv[2]);
 			}
 		}
 	}
 
 	return 0;
 }
+
+
+void read_request(int fd, char* cmd){
+
+	char* read_buf[sizeof(cmd)];
+	//char* write_buf[sizeof(cmd)+2];
+
+	struct sockaddr_in server;
+	memset(&server, 0, sizeof(server));
+	server.sin_port = htons(1069);
+
+	//sprintf(write_buf,"%s\0",cmd);
+	memset(&read_buf, 0,sizeof(read_buf));
+	int err = sendto(fd,cmd,sizeof(cmd),0,(struct sockaddr *) &server, sizeof(server));
+	if(err == -1){
+		perror("Erreur send");
+	}else{
+		printf("Write success\n");
+		//int err = read(fd, read_buf,sizeof(read_buf));
+		err=1;
+		if(err == -1){
+			perror("Error read request");
+		}else{
+			//buffer[128]=0;
+			printf("Lecture réussi :) !");
+			//write (1, buffer, 128);
+
+			}
+		}
+	}
+
+
 
 
 void DISPLAY_IP(struct addrinfo res){
