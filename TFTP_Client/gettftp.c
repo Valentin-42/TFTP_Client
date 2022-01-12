@@ -14,7 +14,7 @@ int main(int argc, char* argv[]){
 	}else{
 		DISPLAY_IP(*res);
 		int sock;
-		if((sock = socket(PF_INET, SOCK_STREAM,0)) < 0){
+		if((sock = socket(PF_INET, SOCK_DGRAM,IPPROTO_UDP)) < 0){
 			printf("Erreur creation socket\n");
 		}else{
 			printf("Socket créé\n");
