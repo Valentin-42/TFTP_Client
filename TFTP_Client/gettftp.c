@@ -1,7 +1,5 @@
 #include "gettftp.h"
 
-
-
 int main(int argc, char* argv[]){
 	/*TEST*/
 	printf("Get\n");
@@ -37,22 +35,22 @@ int main(int argc, char* argv[]){
 
 void read_request(int fd, char* cmd){
 
-	char* read_buf[sizeof(cmd)];
-	//char* write_buf[sizeof(cmd)+2];
+	char* read_buf[BUF_SIZE];
 
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_port = htons(1069);
 
-	//sprintf(write_buf,"%s\0",cmd);
 	memset(&read_buf, 0,sizeof(read_buf));
+	//Sendto
 	int err = sendto(fd,cmd,sizeof(cmd),0,(struct sockaddr *) &server, sizeof(server));
 	if(err == -1){
 		perror("Erreur send");
 	}else{
 		printf("Write success\n");
-		//int err = read(fd, read_buf,sizeof(read_buf));
-		err=1;
+		//Read socket
+		socklen_t addrlen = sizeof(server);
+		int err = recvfrom(fd, read_buf,sizeof(read_buf),0, (struct sockaddr *) &server, &addrlen);
 		if(err == -1){
 			perror("Error read request");
 		}else{
