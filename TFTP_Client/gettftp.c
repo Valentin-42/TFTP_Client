@@ -24,6 +24,7 @@ int main(int argc, char* argv[]){
 			}else{
 				printf("Connection établie\n");
 				read_request(sock,argv[2]);
+				close(sock);
 			}
 		}
 	}
@@ -47,7 +48,7 @@ void read_request(int fd, char* cmd){
 
 	//Sendto
 
-	*RRQ = (int) 0x0100;
+	*RRQ = (int) 0x0100; //Big endian
 	strncpy((char*)RRQ+2, cmd, strlen(cmd));
 
 	strncpy((char*)RRQ+strlen(cmd)+3, "netascii", strlen("netascii"));
@@ -63,12 +64,28 @@ void read_request(int fd, char* cmd){
 		//Read socket
 		socklen_t addrlen = sizeof(server);
 		int err = recvfrom(fd, read_buf,sizeof(read_buf),0, (struct sockaddr *) &server, &addrlen);
+		close(fd);
 		if(err == -1){
 			perror("Error read request");
 		}else{
-			//buffer[128]=0;
-			printf("Lecture réussi :) !");
-			//write (1, buffer, 128);
+
+			printf("\n *** Lecture réussi :) ! *** \n\n");
+			write (1, read_buf, sizeof(read_buf));
+			printf("\n\n **** \n\n");
+
+			char Txt[128];
+			sprintf(Txt,"Voici la reponse : %c", (char*)read_buf);
+
+			int Save_File_fd = creat(cmd, S_IRWXU);
+			if(Save_File_fd== -1){
+				perror("Erreur creation fichier : ");
+			}else{
+				int isOK = write (Save_File_fd,Txt, sizeof(Txt));
+				close(Save_File_fd);
+				printf(" %d bytes saved :) ! \n",isOK);
+
+			}
+
 			free(RRQ);
 			}
 		}
