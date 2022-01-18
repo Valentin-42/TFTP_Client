@@ -23,7 +23,6 @@ int main(int argc, char* argv[]){
 				perror("Erreur connection serveur");
 			}else{
 				printf("Connection établie\n");
-
 				read_request(sock,argv[2]);
 			}
 		}
@@ -36,14 +35,27 @@ int main(int argc, char* argv[]){
 void read_request(int fd, char* cmd){
 
 	char* read_buf[BUF_SIZE];
-
+	int* RRQ;
+	int RRQ_size = strlen(cmd)+strlen("netascii")+4;
+	RRQ = (int*) malloc(24);
+	printf("Taille RRQ = %d\n", RRQ_size);
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_port = htons(1069);
 
 	memset(&read_buf, 0,sizeof(read_buf));
+
 	//Sendto
-	int err = sendto(fd,cmd,sizeof(cmd),0,(struct sockaddr *) &server, sizeof(server));
+
+	*RRQ = (int) 0x0100;
+	strncpy((char*)RRQ+2, cmd, strlen(cmd));
+
+	strncpy((char*)RRQ+strlen(cmd)+3, "netascii", strlen("netascii"));
+
+	*(RRQ+strlen(cmd)*sizeof(char)+4) = (int) 0x0;
+
+	int err = sendto(fd,RRQ,RRQ_size,0,(struct sockaddr *) &server, sizeof(server));
+
 	if(err == -1){
 		perror("Erreur send");
 	}else{
@@ -57,7 +69,7 @@ void read_request(int fd, char* cmd){
 			//buffer[128]=0;
 			printf("Lecture réussi :) !");
 			//write (1, buffer, 128);
-
+			free(RRQ);
 			}
 		}
 	}
